@@ -47,7 +47,7 @@
             if (data && data.online) {
               this.statusMessage = `✅ 伺服器在線上，目前有 ${data.players.online} 位玩家`;
               this.players = data.players.list || [];
-              if (data.players.list == [] && data.players.online != 0){
+              if (data.players.list && data.players.online > data.players.list.length){
                 this.statusMessage = `✅ 伺服器在線上，目前有 ${data.players.online} 位玩家
                 由於玩家過多，無法逐一顯示`;
               }
