@@ -3,42 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <title>Minecraft Server Status</title>
-  <script src="https://unpkg.com/mc-server-status@1.2.0/dist/index.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #1e1e1e;
-      color: #fff;
-      text-align: center;
-      padding: 2rem;
-    }
-    .status {
-      font-size: 1.5rem;
-      margin-top: 1rem;
-    }
-  </style>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Minecraft Server Status Checker</h1>
-  <p class="status">Checking...</p>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+  <div id="app" class="p-6 max-w-xl w-full text-center">
+    <h1 class="text-3xl font-bold mb-4">Minecraft Server Status</h1>
+    <p class="text-lg mb-4" v-if="statusMessage">{{ statusMessage }}</p>
+
+    <div v-if="players.length > 0" class="grid grid-cols-2 gap-4">
+      <div v-for="player in players" :key="player.uuid" class="bg-gray-800 p-4 rounded-xl shadow">
+        <img
+          :src="`https://crafatar.com/avatars/${player.uuid}?size=60`"
+          class="mx-auto rounded"
+          alt="Player avatar"
+        />
+        <p class="mt-2 font-medium">{{ player.name_clean }}</p>
+      </div>
+    </div>
+
+    <p v-else-if="statusMessage.includes('online')" class="text-gray-400">No players online.</p>
+  </div>
 
   <script>
-    const serverAddress = "normal-minecraft.junner.org";
-    const statusElement = document.querySelector(".status");
+    const { createApp } = Vue;
 
-    fetch(`https://api.mcstatus.io/v2/status/java/${serverAddress}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.online) {
-          statusElement.textContent = `✅ Server is online with ${data.players.online} player(s) online.`;
-        } else {
-          statusElement.textContent = "❌ Server is offline or unreachable.";
+    createApp({
+      data() {
+        return {
+          statusMessage: "Checking...",
+          players: []
+        };
+      },
+      methods: {
+        async fetchStatus() {
+          try {
+            // Later, change this to your own backend: `/api/status`
+            const res = await fetch("https://api.mcstatus.io/v2/status/java/normal-minecraft.junner.org");
+            const data = await res.json();
+
+            if (data && data.online) {
+              this.statusMessage = `✅ Server is online with ${data.players.online} player(s).`;
+              this.players = data.players.list || [];
+            } else {
+              this.statusMessage = "❌ Server is offline or unreachable.";
+              this.players = [];
+            }
+          } catch (e) {
+            this.statusMessage = "❌ Error fetching status.";
+            this.players = [];
+            console.error(e);
+          }
         }
-      })
-      .catch(err => {
-        console.error(err);
-        statusElement.textContent = "❌ Error connecting to server.";
-      });
+      },
+      mounted() {
+        this.fetchStatus();
+        setInterval(this.fetchStatus, 30000); // update every 30 sec
+      }
+    }).mount("#app");
   </script>
 </body>
 </html>
