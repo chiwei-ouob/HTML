@@ -40,7 +40,6 @@
       methods: {
         async fetchStatus() {
           try {
-            this.statusMessage = `更新中...`;
             // Later, change this to your own backend: `/api/status`
             const res = await fetch(`https://api.mcstatus.io/v2/status/java/${this.server}`);
             const data = await res.json();
