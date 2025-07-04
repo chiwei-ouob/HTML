@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft Server Status</title>
+  <script src="https://unpkg.com/mc-server-status@1.2.0/dist/index.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+    }
+    .status {
+      font-size: 1.5rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Minecraft Server Status Checker</h1>
+  <p class="status">Checking...</p>
+
+  <script>
+    const serverAddress = "normal-minecraft.junner.org";
+    const statusElement = document.querySelector(".status");
+
+    fetch(`https://api.mcstatus.io/v2/status/java/${serverAddress}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.online) {
+          statusElement.textContent = `✅ Server is online with ${data.players.online} player(s) online.`;
+        } else {
+          statusElement.textContent = "❌ Server is offline or unreachable.";
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        statusElement.textContent = "❌ Error connecting to server.";
+      });
+  </script>
+</body>
+</html>
