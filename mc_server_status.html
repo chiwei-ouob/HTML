@@ -8,7 +8,8 @@
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
   <div id="app" class="p-6 max-w-xl w-full text-center">
-    <h1 class="text-3xl font-bold mb-4">Minecraft Server Status</h1>
+    <h1 class="text-3xl font-bold mb-4">Minecraft 伺服器狀態</h1>
+    <p class="text-lg mb-4" v-if="server">目前伺服器: {{ server }}</p>
     <p class="text-lg mb-4" v-if="statusMessage">{{ statusMessage }}</p>
 
     <div v-if="players.length > 0" class="grid grid-cols-2 gap-4">
@@ -22,7 +23,7 @@
       </div>
     </div>
 
-    <p v-else-if="statusMessage.includes('online')" class="text-gray-400">No players online.</p>
+    <p v-else-if="statusMessage.includes('online')" class="text-gray-400">沒有玩家在線上</p>
   </div>
 
   <script>
@@ -31,22 +32,24 @@
     createApp({
       data() {
         return {
-          statusMessage: "Checking...",
+          server: new URLSearchParams(window.location.search).get("server") || "normal-minecraft.junner.org",
+          statusMessage: "查詢中...",
           players: []
         };
       },
       methods: {
         async fetchStatus() {
           try {
+            this.statusMessage = `更新中...`;
             // Later, change this to your own backend: `/api/status`
-            const res = await fetch("https://api.mcstatus.io/v2/status/java/normal-minecraft.junner.org");
+            const res = await fetch(`https://api.mcstatus.io/v2/status/java/${this.server}`);
             const data = await res.json();
 
             if (data && data.online) {
-              this.statusMessage = `✅ Server is online with ${data.players.online} player(s).`;
+              this.statusMessage = `✅ 伺服器在線上，目前有 ${data.players.online} 位玩家`;
               this.players = data.players.list || [];
             } else {
-              this.statusMessage = "❌ Server is offline or unreachable.";
+              this.statusMessage = "❌ 無法連接到伺服器";
               this.players = [];
             }
           } catch (e) {
