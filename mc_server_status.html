@@ -10,14 +10,14 @@
   <div id="app" class="p-6 max-w-xl w-full text-center">
     <h1 class="text-3xl font-bold mb-4">Minecraft 伺服器狀態</h1>
     <p class="text-lg mb-4">目前伺服器: {{ server }}</p>
-    <div v-if="status.motd && status.motd.clean" class="my-4">
+    <div v-if="status && status.motd && status.motd.clean" class="my-4">
       <hr class="border-gray-600 mb-2" />
       <p class="text-sm text-gray-300 text-center" v-html="status.motd.html"></p>
       <hr class="border-gray-600 mt-2" />
     </div>
     <p class="text-lg mb-4" v-if="statusMessage">{{ statusMessage }}</p>
 
-    <div v-if="players.length > 0" class="grid grid-cols-2 gap-4">
+    <div v-if="player && players.length > 0" class="grid grid-cols-2 gap-4">
       <div v-for="player in players" :key="player.uuid" class="bg-gray-800 p-4 rounded-xl shadow">
         <img
           :src="`https://crafatar.com/avatars/${player.uuid}?size=60`"
@@ -48,6 +48,13 @@
           try {
             // Later, change this to your own backend: `/api/status`
             const res = await fetch(`https://api.mcstatus.io/v2/status/java/${this.server}`);
+            if (!res.ok) {
+              // 處理 bad request 或其他 HTTP 錯誤
+              this.statusMessage = `❌ 無法連接到伺服器 (${res.status})`;
+              console.log('bad api')
+              this.players = [];
+              return;
+            }
             const data = await res.json();
 
             if (data && data.online) {
@@ -61,7 +68,7 @@
           } catch (e) {
             this.statusMessage = "❌ Error fetching status.";
             this.players = [];
-            console.error(e);
+            console.error("Error fetching status. ", e);
           }
         }
       },
