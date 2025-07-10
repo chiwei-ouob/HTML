@@ -17,7 +17,7 @@
     </div>
     <p class="text-lg mb-4" v-if="statusMessage">{{ statusMessage }}</p>
 
-    <div v-if="player && players.length > 0" class="grid grid-cols-2 gap-4">
+    <div v-if="players && players.length > 0" class="grid grid-cols-2 gap-4">
       <div v-for="player in players" :key="player.uuid" class="bg-gray-800 p-4 rounded-xl shadow">
         <img
           :src="`https://crafatar.com/avatars/${player.uuid}?size=60`"
